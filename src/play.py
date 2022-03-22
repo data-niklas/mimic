@@ -1,7 +1,7 @@
-from pynput.mouse import MouseController
-from pynput.keyboard import KeyboardController
+from pynput.mouse import Controller as MouseController
+from pynput.keyboard import Controller as KeyboardController
 
-from .ast import *
+from ast import *
 
 class Parser():
     def __init__(self) -> None:
@@ -31,7 +31,7 @@ class Parser():
         self.skip_comments()
         header = Header()
         while not self.is_eof():
-            line = self.line().trim()
+            line = self.line().strip()
             self.advance()
             if line.startswith("-"):
                 return header
@@ -41,9 +41,10 @@ class Parser():
         return header
 
     def parse_if(self):
-        condition = self.line().trim()[2:]
+        condition = self.line().strip()[2:]
+        self.advance()
         block = self.parse_block()
-        if self.line().trim() == "else":
+        if self.line().strip() == "else":
             self.advance()
             else_block = self.parse_block()
         else:
@@ -52,28 +53,39 @@ class Parser():
 
 
     def parse_loop(self):
-        n = self.line().trim()[5:]
+        n = self.line().strip()[5:]
+        self.advance()
         block = self.parse_block()
         return Loop(n, block)
 
-    def parse_move(self):
-        line = self.line().trim()[5:]
+    def parse_move(self, millis, line):
+        line = line[5:]
         parts = line.split(' ')
         if len(parts) >= 2:
             x = parts[0]
             y = parts[1]
-            relative = True
+            relative = "True"
         if len(parts) == 3:
             relative = parts[2]
         # TODO throw error
 
-        return Move(x, y, relative)
+        return Move(millis, x, y, relative)
+
+    def parse_action(self):
+        line = self.line().strip()
+        millis_index = line.index(" ")
+        millis = line[:millis_index]
+        line = line[millis_index+1:].lstrip()
+        if line.startswith("move"):
+            part = self.parse_move(millis, line)
+
+        return part
 
 
     def parse_block(self):
         body = Body()
         while not self.is_eof():
-            line = self.line().trim()
+            line = self.line().strip()
             if line == "end":
                 self.advance()
                 return body
@@ -83,8 +95,9 @@ class Parser():
                 part = self.parse_if()
             elif line.startswith("loop"):
                 part = self.parse_loop()
-            elif line.startswith("move"):
-                part = self.parse_move()
+            else:
+                part = self.parse_action()
+                self.advance()
             
             body.add_part(part)
 
@@ -96,6 +109,7 @@ class Parser():
         fragment = Fragment()
         fragment.header = self.parse_header()
         fragment.body = self.parse_block()
+        print(fragment.__str__())
 
         return fragment
 

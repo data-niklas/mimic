@@ -1,8 +1,8 @@
 import argparse
 import pathlib
 
-from .play import Play
-from .record import Record
+from play import Play
+from record import Record
 
 NAME = "mimic"
 VERSION = "1.0.0"
@@ -20,4 +20,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     file = args.file
     action = args.action
+
+    if action == "play":
+        play = Play()
+        play.run_file(file, dict())
     
