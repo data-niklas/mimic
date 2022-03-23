@@ -1,0 +1,5 @@
+text
+-
+loop 5
+     1000 type $text
+end

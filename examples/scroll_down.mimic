@@ -1,0 +1,4 @@
+-
+loop 10
+     500 scroll 0 -1
+end
