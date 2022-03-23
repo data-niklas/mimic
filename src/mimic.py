@@ -14,6 +14,7 @@ def create_argparser():
     parser.add_argument('action', choices=["play", "record"])
     parser.add_argument('file', type=pathlib.Path)
     parser.add_argument('--vars', nargs='+', required=False)
+    parser.add_argument('--hotkey')
     return parser
 
 
@@ -43,3 +44,6 @@ if __name__ == "__main__":
         play_controller = PlayController()
         variables = parse_variables(args.vars)
         play_controller.run_file(file, variables)
+    else:
+        record = Record()
+        record.record_to_file(file)
