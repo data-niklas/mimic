@@ -64,12 +64,52 @@ class Parser():
         if len(parts) >= 2:
             x = parts[0]
             y = parts[1]
-            relative = "True"
+            relative = "true"
         if len(parts) == 3:
             relative = parts[2]
         # TODO throw error
 
         return Move(millis, x, y, relative)
+
+    def parse_click(self, millis, line):
+        line = line[6:]
+        parts = line.split(' ')
+        if len(parts) >= 1:
+            button = parts[0]
+            times = "1"
+
+        if len(parts) == 2:
+            times = parts[1]
+
+        return Click(millis, button, times)
+
+
+    def parse_key(self, millis, line):
+        line = line[4:]
+        parts = line.split(' ')
+        if len(parts) == 2:
+            key = parts[0]
+            is_down = parts[1]
+
+        return Key(millis, key, is_down)
+
+
+    def parse_type(self, millis, line):
+        line = line[5:]
+        return Type(millis, line)
+
+    def parse_scroll(self, millis, line):
+        line = line[7:]
+        parts = line.split(' ')
+        if len(parts) == 2:
+            x = parts[0]
+            y = parts[1]
+
+        return Scroll(millis, x, y)
+
+    def parse_command(self, millis, line):
+        line = line[8:]
+        return Command(millis, line)
 
     def parse_action(self):
         line = self.line().strip()
@@ -78,7 +118,16 @@ class Parser():
         line = line[millis_index+1:].lstrip()
         if line.startswith("move"):
             part = self.parse_move(millis, line)
-
+        elif line.startswith("click"):
+            part = self.parse_click(millis, line)
+        elif line.startswith("key"):
+            part = self.parse_key(millis, line)
+        elif line.startswith("type"):
+            part = self.parse_type(millis, line)
+        elif line.startswith("scroll"):
+            part = self.parse_scroll(millis, line)
+        elif line.startswith("command"):
+            part = self.parse_command(millis, line)
         return part
 
 
@@ -113,24 +162,28 @@ class Parser():
 
         return fragment
 
-
 class Play():
-    def __init__(self) -> None:
-        self.mouse_controller = MouseController()
-        self.keyboard_controller = KeyboardController()
-        self.variables = dict()
-        self.parser = Parser()
-
-    def run_file(self, file, variables):
+    def __init__(self, controller, variables):
+        self.controller = controller
         self.variables = variables
-        file_handle = open(file, 'r')
-        lines = file_handle.readlines()
-        fragment = self.parser.parse(lines)
-        fragment(self)
-        file_handle.close()
 
     def var_or_val(self, name):
         if name.startswith("$"):
             return self.variables[name[1:]]
         else:
             return name
+
+class PlayController():
+    def __init__(self) -> None:
+        self.mouse_controller = MouseController()
+        self.keyboard_controller = KeyboardController()
+        self.parser = Parser()
+
+    def run_file(self, file, variables):
+        file_handle = open(file, 'r')
+        lines = file_handle.readlines()
+        # TODO check all vars
+        fragment = self.parser.parse(lines)
+        fragment(Play(self, variables))
+        file_handle.close()
+

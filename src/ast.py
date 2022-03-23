@@ -1,6 +1,6 @@
 import subprocess
 from pynput.mouse import Button
-from pynput.keyboard import Key
+from pynput.keyboard import Key as PynputKey
 from time import sleep
 
 class Header():
@@ -95,8 +95,8 @@ class Click(TimedPart):
 
     def map_button(self, instance):
         MAP = [Button.left, Button.middle, Button.right]
-        button = int(instance.var_or_val(button))
-        if button <= 0 or button > 2:
+        button = int(instance.var_or_val(self.button))
+        if button <= 0 or button > 3:
             return Button.unknown
         else:
             return MAP[button - 1]
@@ -105,7 +105,7 @@ class Click(TimedPart):
         super().__call__(instance)
         button = self.map_button(instance)
         times = int(instance.var_or_val(self.times))
-        instance.mouse_controller.click(button, times)
+        instance.controller.mouse_controller.click(button, times)
 
     def __str__(self) -> str:
         return f"click {self.millis} {self.button} {self.times}"
@@ -122,9 +122,9 @@ class Move(TimedPart):
         x = int(instance.var_or_val(self.x))
         y = int(instance.var_or_val(self.y))
         if instance.var_or_val(self.relative) == "true":
-            instance.mouse_controller.move(x, y)
+            instance.controller.mouse_controller.move(x, y)
         else:
-            instance.mouse_controller.position = (x, y)
+            instance.controller.mouse_controller.position = (x, y)
 
     def __str__(self) -> str:
         return f"move {self.millis} {self.x} {self.y} {self.relative}"
@@ -138,15 +138,17 @@ class Key(TimedPart):
 
     def __call__(self, instance):
         super().__call__(instance)
-        if hasattr(Key, self.key):
-            key = getattr(Key, self.key)
-        else:
-            key = self.key
+        key = instance.var_or_val(self.key)
+        is_down = instance.var_or_val(self.is_down)
+        is_down = is_down == "true" or is_down == "down" or is_down == "press"
 
-        if self.is_down:
-            instance.keyboard_controller.press(key)
+        if hasattr(PynputKey, key):
+            key = getattr(PynputKey, key)
+
+        if is_down:
+            instance.controller.keyboard_controller.press(key)
         else:
-            instance.keyboard_controller.release(key)
+            instance.controller.keyboard_controller.release(key)
 
     def __str__(self) -> str:
         return f"key {self.millis} {self.key} {self.is_down}"
@@ -159,7 +161,37 @@ class Type(TimedPart):
 
     def __call__(self, instance):
         super().__call__(instance)
-        instance.keyboard_controller.type(self.text)
+        text = instance.var_or_val(self.text)
+        instance.controller.keyboard_controller.type(text)
 
     def __str__(self) -> str:
         return f"type {self.millis} {self.text}"
+
+class Scroll(TimedPart):
+    def __init__(self, millis, x, y) -> None:
+        super().__init__(millis)
+        self.x = x
+        self.y = y
+
+    def __call__(self, instance):
+        super().__call__(instance)
+        x = int(instance.var_or_val(self.x))
+        y = int(instance.var_or_val(self.y))
+        instance.controller.mouse_controller.scroll(x, y)
+
+    def __str__(self) -> str:
+        return f"scroll {self.millis} {self.x} {self.y}"
+
+
+class Command(TimedPart):
+    def __init__(self, millis, command) -> None:
+        super().__init__(millis)
+        self.command = command
+
+    def __call__(self, instance):
+        super().__call__(instance)
+        command = instance.var_or_val(self.command)
+        subprocess.run(command, shell=True)
+
+    def __str__(self) -> str:
+        return f"command {self.millis} {self.command}"
