@@ -117,18 +117,20 @@ class Parser():
         millis = line[:millis_index]
         line = line[millis_index+1:].lstrip()
         if line.startswith("move"):
-            part = self.parse_move(millis, line)
+            return self.parse_move(millis, line)
         elif line.startswith("click"):
-            part = self.parse_click(millis, line)
+            return self.parse_click(millis, line)
         elif line.startswith("key"):
-            part = self.parse_key(millis, line)
+            return self.parse_key(millis, line)
         elif line.startswith("type"):
-            part = self.parse_type(millis, line)
+            return self.parse_type(millis, line)
         elif line.startswith("scroll"):
-            part = self.parse_scroll(millis, line)
+            return self.parse_scroll(millis, line)
         elif line.startswith("command"):
-            part = self.parse_command(millis, line)
-        return part
+            return self.parse_command(millis, line)
+        else:
+            print(f"Unknown action {line}")
+        return 1
 
 
     def parse_block(self):

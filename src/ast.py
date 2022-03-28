@@ -11,7 +11,7 @@ class Header():
         self.variables.append(variable)
 
     def __str__(self) -> str:
-        return ", ".join(self.variables)
+        return "\n".join(self.variables)
 
 
 class Part():
@@ -42,7 +42,7 @@ class Fragment():
         self.body(instance)
 
     def __str__(self) -> str:
-        return f"{self.header}\n{self.body}"
+        return f"{self.header}\n-\n{self.body}"
 
 
 
@@ -108,7 +108,7 @@ class Click(TimedPart):
         instance.controller.mouse_controller.click(button, times)
 
     def __str__(self) -> str:
-        return f"click {self.millis} {self.button} {self.times}"
+        return f"{self.millis} click {self.button} {self.times}"
 
 class Move(TimedPart):
     def __init__(self, millis, x, y, relative) -> None:
@@ -127,7 +127,7 @@ class Move(TimedPart):
             instance.controller.mouse_controller.position = (x, y)
 
     def __str__(self) -> str:
-        return f"move {self.millis} {self.x} {self.y} {self.relative}"
+        return f"{self.millis} move {self.x} {self.y} {self.relative}"
 
 
 class Key(TimedPart):
@@ -151,7 +151,7 @@ class Key(TimedPart):
             instance.controller.keyboard_controller.release(key)
 
     def __str__(self) -> str:
-        return f"key {self.millis} {self.key} {self.is_down}"
+        return f"{self.millis} key {self.key} {self.is_down}"
 
 
 class Type(TimedPart):
@@ -165,7 +165,7 @@ class Type(TimedPart):
         instance.controller.keyboard_controller.type(text)
 
     def __str__(self) -> str:
-        return f"type {self.millis} {self.text}"
+        return f"{self.millis} type {self.text}"
 
 class Scroll(TimedPart):
     def __init__(self, millis, x, y) -> None:
@@ -180,7 +180,7 @@ class Scroll(TimedPart):
         instance.controller.mouse_controller.scroll(x, y)
 
     def __str__(self) -> str:
-        return f"scroll {self.millis} {self.x} {self.y}"
+        return f"{self.millis} scroll {self.x} {self.y}"
 
 
 class Command(TimedPart):
@@ -194,4 +194,4 @@ class Command(TimedPart):
         subprocess.run(command, shell=True)
 
     def __str__(self) -> str:
-        return f"command {self.millis} {self.command}"
+        return f"{self.millis} command {self.command}"
