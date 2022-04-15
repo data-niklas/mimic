@@ -2,7 +2,15 @@
 Mimics mouse and keyboard input
 
 ## Goals
-Cross platform using `pynput`
+- Cross platform
+- Use `pynput`
+
+
+## Installation
+- Clone the repository: `git clone https://github.com/data-niklas/mimic.git`
+- `cd mimic`
+- Start with `python src/mimic.py`
+- Or create an alias in your `.bashrc`: `alias mimic="python path/to/mimic.py"`
 
 ### Record
 - Records the user input
