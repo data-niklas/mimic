@@ -3,6 +3,8 @@ from pynput.mouse import Button
 from pynput.keyboard import Key as PynputKey
 from time import sleep
 
+from utils import str_to_key
+
 class Header():
     def __init__(self) -> None:
         self.variables = []
@@ -139,11 +141,10 @@ class Key(TimedPart):
     def __call__(self, instance):
         super().__call__(instance)
         key = instance.var_or_val(self.key)
+        key = str_to_key(key)
+
         is_down = instance.var_or_val(self.is_down)
         is_down = is_down == "true" or is_down == "down" or is_down == "press"
-
-        if hasattr(PynputKey, key):
-            key = getattr(PynputKey, key)
 
         if is_down:
             instance.controller.keyboard_controller.press(key)

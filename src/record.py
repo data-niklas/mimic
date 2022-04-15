@@ -4,6 +4,8 @@ from time import time_ns
 
 from ast import *
 
+from utils import parse_key, parse_button
+
 class Record():
     def __init__(self):
         self.stopped = False
@@ -33,7 +35,7 @@ class Record():
             if not pressed:
                 return
             delta = self.new_action()
-            part = Click(delta, str(button).replace("Button.", "").replace("left", "1"), "1")
+            part = Click(delta, parse_button(button), "1")
             self.add_part(part)
 
         def on_scroll(x, y, dx, dy):
@@ -44,13 +46,13 @@ class Record():
         def on_press(key):
             print(key)
             delta = self.new_action()
-            key = str(key).replace("Key.", "").replace("'","")
+            key = parse_key(key)
             part = Key(delta, key, "true")
             self.add_part(part)
 
         def on_release(key):
             delta = self.new_action()
-            key = str(key).replace("Key.", "").replace("'","")
+            key = parse_key(key)
             part = Key(delta, key, "false")
             self.add_part(part)
             if self.stopped:
